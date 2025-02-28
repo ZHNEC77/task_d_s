@@ -14,7 +14,6 @@ def register(request):
             login(request, user)
             messages.success(request, 'Регистрация прошла успешно!')
             return redirect('profile')     # !!!!
-        messages.error(request, 'Исправьте ошибки в форме.')
     else:
         form = UserRegistrationForm()
     return render(request, 'users/register.html', {'form': form})
