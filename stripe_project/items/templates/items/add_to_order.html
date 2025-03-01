@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add to Order</title>
+</head>
+
+<body>
+    <h1>Добавить товар в заказ</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Добавить</button>
+    </form>
+    <a href="{% url 'order_detail' order.id %}">Вернуться к заказу</a>
+</body>
+
+</html>

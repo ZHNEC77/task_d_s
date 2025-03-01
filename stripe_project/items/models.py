@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from users.models import User
 
 
 class Item(models.Model):
@@ -16,6 +17,8 @@ class Item(models.Model):
         choices=CURRENCY_CHOICES,
         default='usd'
     )
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='items')
 
     def __str__(self):
         return self.name
@@ -83,9 +86,31 @@ class Order(models.Model):
         'Discount', on_delete=models.SET_NULL, null=True, blank=True)
     tax = models.ForeignKey(
         'Tax', on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='orders')
 
     def __str__(self):
         return f"Order {self.id}"
+
+    def add_item(self, item, quantity=1):
+        """
+        Добавляет товар в заказ.
+        """
+        order_item, created = OrderItem.objects.get_or_create(
+            order=self, item=item)
+        if not created:
+            order_item.quantity += quantity
+        else:
+            order_item.quantity = quantity
+        order_item.save()
+        self.calculate_total_price()
+
+    def remove_item(self, item):
+        """
+        Удаляет товар из заказа.
+        """
+        OrderItem.objects.filter(order=self, item=item).delete()
+        self.calculate_total_price()
 
     def calculate_total_price(self):
         currencies = {item.currency for item in self.items.all()}
