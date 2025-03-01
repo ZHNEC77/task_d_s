@@ -19,12 +19,11 @@ def get_stripe_keys(currency):
         raise ValueError(f"Unsupported currency: {currency}")
 
 
-@login_required
 def item_detail(request, id):
     """
     View для отображения страницы товара.
     """
-    item = get_object_or_404(Item, id=id, user=request.user)
+    item = get_object_or_404(Item, id=id)
     _, public_key = get_stripe_keys(item.currency)
     return render(request, 'items/item_detail.html', {
         'item': item,

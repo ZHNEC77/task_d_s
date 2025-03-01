@@ -17,8 +17,6 @@ class Item(models.Model):
         choices=CURRENCY_CHOICES,
         default='usd'
     )
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='items')
 
     def __str__(self):
         return self.name
