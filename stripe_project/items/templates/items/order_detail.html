@@ -14,8 +14,7 @@
     <ul>
         {% for order_item in order.order_items.all %}
         <li>
-            {{ order_item.quantity }} x {{ order_item.item.name }} - {{ order_item.item.price }} {{ order.item.currency
-            }}
+            {{ order_item.quantity }} x {{ order_item.item.name }} - {{ order_item.item.price }} {{ order.currency }}
             <a href="{% url 'remove_from_order' order.id order_item.item.id %}">Remove</a>
         </li>
         {% empty %}
@@ -27,7 +26,7 @@
     <p>Total Price: {{ order.total_price }} {{ order.currency }}</p>
 
     <!-- Кнопка для добавления товара в заказ -->
-    <a href="{% url 'add_to_order' order.id %}">Add Item</a>
+    <a href="{% url 'add_to_order' %}">Add Item</a>
 
     <!-- Кнопка для оплаты заказа -->
     <button id="buy-button">Buy</button>

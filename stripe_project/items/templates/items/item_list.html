@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Item List</title>
+</head>
+
+<body>
+    <h1>Item List</h1>
+
+    <!-- Список товаров -->
+    <ul>
+        {% for item in items %}
+        <li>
+            <a href="{% url 'item_detail' item.id %}">{{ item.name }}</a> - {{ item.price }} {{ item.currency }}
+        </li>
+        {% empty %}
+        <li>No items available.</li>
+        {% endfor %}
+    </ul>
+</body>
+
+</html>

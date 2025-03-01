@@ -111,6 +111,12 @@ class Order(models.Model):
         self.calculate_total_price()
 
     def calculate_total_price(self):
+        items = self.items.all()
+        if not items.exists():
+            self.total_price = 0
+            self.save()
+            return
+
         currencies = {item.currency for item in self.items.all()}
         if len(currencies) != 1:
             raise ValidationError(

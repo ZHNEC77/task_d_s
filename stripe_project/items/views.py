@@ -19,6 +19,14 @@ def get_stripe_keys(currency):
         raise ValueError(f"Unsupported currency: {currency}")
 
 
+def item_list(request):
+    """
+    View для отображения списка товаров.
+    """
+    items = Item.objects.all()
+    return render(request, 'items/item_list.html', {'items': items})
+
+
 def item_detail(request, id):
     """
     View для отображения страницы товара.
@@ -31,12 +39,11 @@ def item_detail(request, id):
     })
 
 
-@login_required
 def buy_item(request, id):
     """
     View для создания Stripe Checkout Session для оплаты одного товара.
     """
-    item = get_object_or_404(Item, id=id, user=request.user)
+    item = get_object_or_404(Item, id=id)
     secret_key, _ = get_stripe_keys(item.currency)
     stripe.api_key = secret_key
 
@@ -69,21 +76,34 @@ def create_order(request):
 
 
 @login_required
-def add_to_order(request, order_id):
+def add_to_order(request):
     """
     View для добавления товара в заказ.
     """
-    order = get_object_or_404(Order, id=order_id, user=request.user)
     if request.method == 'POST':
-        form = AddToOrderForm(request.POST, user=request.user)
-        if form.is_valid():
-            item = form.cleaned_data['item']
-            quantity = form.cleaned_data['quantity']
-            OrderItem.objects.create(order=order, item=item, quantity=quantity)
-            return redirect('order_detail', id=order.id)
+        item_id = request.POST.get('item_id')
+        quantity = int(request.POST.get('quantity', 1))
+        item = get_object_or_404(Item, id=item_id)
+
+        # Получаем или создаем заказ для текущего пользователя
+        order, created = Order.objects.get_or_create(
+            user=request.user, defaults={'currency': item.currency})
+
+        # Добавляем товар в заказ
+        order_item, created = OrderItem.objects.get_or_create(
+            order=order, item=item)
+        if not created:
+            order_item.quantity += quantity
+        else:
+            order_item.quantity = quantity
+        order_item.save()
+
+        # Пересчитываем общую стоимость заказа
+        order.calculate_total_price()
+
+        return redirect('order_detail', id=order.id)
     else:
-        form = AddToOrderForm(user=request.user)
-    return render(request, 'items/add_to_order.html', {'form': form, 'order': order})
+        return redirect('item_list')
 
 
 @login_required
@@ -94,6 +114,7 @@ def remove_from_order(request, order_id, item_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
     order_item = get_object_or_404(OrderItem, order=order, item_id=item_id)
     order_item.delete()
+    order.calculate_total_price()
     return redirect('order_detail', id=order.id)
 
 
