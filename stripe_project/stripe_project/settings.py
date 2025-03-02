@@ -32,7 +32,7 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG', default=False)
 
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ['https://taskds-production.up.railway.app/']
+CSRF_TRUSTED_ORIGINS = ['*']
 
 # Application definition
 
