@@ -17,6 +17,10 @@ python manage.py loaddata db_dump.json
 python manage.py runserver
 
 # 6. Можно поднять проект через Docker
+но поменять эту строку
+CMD ["sh", "-c", "python manage.py migrate && python manage.py loaddata db_dump.json && gunicorn stripe_project.wsgi"]
+на эту 
+CMD ["sh", "-c", "python manage.py migrate && python manage.py loaddata db_dump.json && python manage.py runserver"]
 docker-compose up --build
 
 # 7. Регистрация и админка
