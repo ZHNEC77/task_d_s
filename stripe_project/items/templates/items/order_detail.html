@@ -9,6 +9,17 @@
 <body>
     <h1>Order {{ order.id }}</h1>
 
+    <!-- Блок для отображения сообщений -->
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <!-- Список товаров в заказе -->
     <h2>Items:</h2>
     <ul>

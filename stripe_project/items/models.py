@@ -115,12 +115,11 @@ class Order(models.Model):
         if not items.exists():
             self.total_price = 0
             self.save()
-            return
+            return None
 
         currencies = {item.currency for item in self.items.all()}
         if len(currencies) != 1:
-            raise ValidationError(
-                "Все товары в заказе должны быть в одной валюте!")
+            return "Все товары в заказе должны быть в одной валюте!"
         self.currency = currencies.pop()
 
         subtotal = sum(

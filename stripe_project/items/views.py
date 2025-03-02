@@ -6,6 +6,7 @@ from .models import Item, Order, OrderItem, Discount, Tax
 from django.contrib.auth.decorators import login_required
 from .forms import AddToOrderForm
 from users.models import User
+from django.contrib import messages
 # stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
@@ -89,6 +90,17 @@ def add_to_order(request):
         order, created = Order.objects.get_or_create(
             user=request.user, defaults={'currency': item.currency})
 
+        if not created and order.currency != item.currency:
+            # Если валюта товара не совпадает с валютой заказа, выводим сообщение об ошибке
+            messages.error(
+                request, "Нельзя добавлять товары в разных валютах в один заказ!")
+            return redirect('items')
+
+        # Если заказ новый, устанавливаем его валюту равной валюте первого товара
+        if created:
+            order.currency = item.currency
+            order.save()
+
         # Добавляем товар в заказ
         order_item, created = OrderItem.objects.get_or_create(
             order=order, item=item)
@@ -100,7 +112,7 @@ def add_to_order(request):
 
         # Пересчитываем общую стоимость заказа
         order.calculate_total_price()
-
+        messages.success(request, "Товар успешно добавлен в заказ!")
         return redirect('order_detail', id=order.id)
     else:
         return redirect('item_list')
